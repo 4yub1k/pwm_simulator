@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QPlainTextEdit
 )
 from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QPalette, QColor
+from PyQt6.QtGui import QPalette, QColor, QIcon
 from numpy import arange, sin, pi          # , cos, linspace
 
 
@@ -75,6 +75,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.plt)
         self.plt.setYRange(0, self.voltage + 2)
         self.plt.showGrid(x=True, y=True)
+        self.setWindowIcon(QIcon("icon.ico"))
         self.plt.setTitle("PWM Simulator/Generator", color="w", size="20pt", font="bold")
 
         styles = {"color": "red", "font-size": "14px"}
