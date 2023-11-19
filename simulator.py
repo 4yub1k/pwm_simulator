@@ -1,5 +1,6 @@
 import logging
 
+from subprocess import run
 from pyqtgraph import mkPen, PlotWidget
 from PyQt6.QtWidgets import (
     QApplication,
@@ -404,6 +405,11 @@ class MainWindow(QMainWindow):
         log_combo.activated.connect(self.option)
         log_grid.addWidget(log_combo, 0, 1)
 
+        log_open_button = QPushButton("Show logs")
+        log_open_button.setStyleSheet("background-color: #000000; color: #7CFC00")
+        log_open_button.clicked.connect(self.open_logs)
+        log_grid.addWidget(log_open_button, 0, 2)
+
         self.grid_layout.addLayout(log_grid, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter)
 
     def option(self, option_num):
@@ -415,6 +421,9 @@ class MainWindow(QMainWindow):
                 self.logger.setLevel(logging.INFO)
             case 1:
                 self.logger.setLevel(logging.DEBUG)
+
+    def open_logs(self):
+        run(["notepad.exe", "simulator.log"])
 
     def monitor(self):
         """
