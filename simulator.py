@@ -47,13 +47,15 @@ class MainWindow(QMainWindow):
     pulse_end, pulse_start = pulse_on_time, 0.0
     global_index_counter = 0.0
 
-    def __init__(self):
+    def __init__(self, logger):
         """
         Main window of APP, Gridlayout is used.
         Where initial plots are plotted. Button, and Check boxex are added. QTimer Is defined
         """
         super().__init__()
-        logger.info(
+
+        self.logger = logger
+        self.logger.info(
             f"""Initialized with values....
             Frequency: {self.freq}
             Time Period: {self.time_period}
@@ -89,7 +91,7 @@ class MainWindow(QMainWindow):
         # f = 10 Hz, T = 1/10 = 0.1, range 0 -> 0.1, and wih steps, 0.1/10 = 0.01 (step_size = timeperiod/freq)
         self.x_axis = list(round(n, self.value_accuracy) for n in arange(0.0, self.time_period * self.number_of_cycles, self.step_size))
         self.plt.setXRange(0.0, self.end_x_axis)
-        logger.debug(
+        self.logger.debug(
             f"""
             x-Axis generated; Size: {len(self.x_axis)},
             Plot Start: {0.0} Plot End: {self.time_period * self.number_of_cycles}
@@ -100,7 +102,7 @@ class MainWindow(QMainWindow):
         self.y_axis_on = self.y_axis()
         pen = mkPen(color=(0, 255, 0))
         self.line_graph = self.plt.plot(self.x_axis, self.y_axis_on, pen=pen, fillLevel=0.0, brush=(0, 255, 0, 100))
-        logger.debug(f"Y- Axis size for ON state: {len(self.y_axis_on)}")
+        self.logger.debug(f"Y- Axis size for ON state: {len(self.y_axis_on)}")
 
         # Update Legend values dynamically.
         self.update_legend()
@@ -108,12 +110,12 @@ class MainWindow(QMainWindow):
         # PWM OFF state Graph.
         self.y_axis_off = [0] * len(self.x_axis)
         self.line_graph_off = self.plt.plot(self.x_axis, self.y_axis_off, fillLevel=0.0, brush=(255, 0, 0, 100))  # (r,g,b,a), a = fill level
-        logger.debug(f"Y- Axis size for OFF state: {len(self.y_axis_on)}")
+        self.logger.debug(f"Y- Axis size for OFF state: {len(self.y_axis_on)}")
 
         # Plot Sine Wave. (Frequeny is already included in X Axis)
         self.sine_y = [0] * len(self.x_axis)
         self.sine_wave = self.plt.plot(self.x_axis, self.sine_y, pen=mkPen(color=(255, 0, 0)))
-        logger.debug(f"Y- Axis size for SINE: {len(self.y_axis_on)}")
+        self.logger.debug(f"Y- Axis size for SINE: {len(self.y_axis_on)}")
 
         self.grid_layout.addWidget(self.plt, 0, 0, 1, 0)  # last 0, 1 will expand, rowSpan, columSpan
 
@@ -156,20 +158,20 @@ class MainWindow(QMainWindow):
         self.start_x_axis += self.step_size
         self.end_x_axis += self.step_size
         self.plt.setXRange(self.start_x_axis, self.end_x_axis)
-        logger.debug(f"Plot updating--plot Start: {self.start_x_axis}, Plot End: {self.end_x_axis}")
+        self.logger.debug(f"Plot updating--plot Start: {self.start_x_axis}, Plot End: {self.end_x_axis}")
 
         # Update X axis values.
         self.x_axis = self.x_axis[1:]
         self.x_axis.append(self.x_axis[-1] + self.step_size)
-        logger.debug(f"Plot updating--X Axis value appended: {self.x_axis[-1] + self.step_size}")
+        self.logger.debug(f"Plot updating--X Axis value appended: {self.x_axis[-1] + self.step_size}")
 
         # PWM ON state update graph------------------------.
         self.y_axis_on = self.y_axis_on[1:]
         self.y_axis_on.append(self.update_y_axis(self.global_index_counter, self.x_axis[-1]))
         self.line_graph.setData(self.x_axis, self.y_axis_on)
         self.global_index_counter += 1      # Keep updaeing global index counter.
-        logger.debug(f"Plot updating--Y Axis ON value appended: {self.y_axis_on[-1]}")
-        logger.debug(f"Plot updating--Global Counter: {self.global_index_counter}")
+        self.logger.debug(f"Plot updating--Y Axis ON value appended: {self.y_axis_on[-1]}")
+        self.logger.debug(f"Plot updating--Global Counter: {self.global_index_counter}")
 
         # PWM OFF state Update graph-------------------------.
         self.y_axis_off = self.y_axis_off[1:]
@@ -185,7 +187,7 @@ class MainWindow(QMainWindow):
         # Sine Wave update graph---------------------------.
         self.sine_y = self.sine_y[1:]
         self.sine_y.append(self.voltage * sin(2 * pi * self.freq * self.x_axis[-1]))
-        logger.debug(f"Plot updating--Y Axis SINE value appended: {self.sine_y[-1]}")
+        self.logger.debug(f"Plot updating--Y Axis SINE value appended: {self.sine_y[-1]}")
 
         # Check if show sine wave button is checked or not.
         if self.graph_chk_sine:
@@ -226,7 +228,7 @@ class MainWindow(QMainWindow):
         if index % self.length == 0.0 and value != 0.0:
             self.pulse_start = self.pulse_start + self.time_period
             self.pulse_end = self.pulse_end + self.time_period
-            logger.debug(f"Update--Start: {self.pulse_start}, Value: {value}, Pulse Width: {self.pulse_on_time}, Time period: {self.time_period}, End: {self.pulse_end}")
+            self.logger.debug(f"Update--Start: {self.pulse_start}, Value: {value}, Pulse Width: {self.pulse_on_time}, Time period: {self.time_period}, End: {self.pulse_end}")
         if value >= self.pulse_start and value <= self.pulse_end:
             return self.voltage
         else:
@@ -240,7 +242,7 @@ class MainWindow(QMainWindow):
         self.legend.addItem(self.line_graph, f"Frequency: {self.freq} Hz")
         self.legend.addItem(self.line_graph, f"Voltage: {self.voltage} VDC")
         self.legend.addItem(self.line_graph, f"Pulse ON: {self.pulse_on_time:0.{self.value_accuracy}f} Sec")
-        logger.info(f"Legend Updated-- Frequnecy: {self.freq}, Voltage: {self.voltage}, Pulse ON: {self.pulse_on_time:0.9f}")
+        self.logger.info(f"Legend Updated-- Frequnecy: {self.freq}, Voltage: {self.voltage}, Pulse ON: {self.pulse_on_time:0.9f}")
 
     def dailer_button(self):
         """
@@ -280,7 +282,7 @@ class MainWindow(QMainWindow):
         self.intervel = self.dial.value()
         self.label_interval.setText(f"Time (Delay): {self.intervel}ms")
         self.timer.setInterval(self.intervel)
-        logger.debug(f"Dial: Time Delay Rotated Value: {self.intervel}")
+        self.logger.debug(f"Dial: Time Delay Rotated Value: {self.intervel}")
 
     def dail_update_interval_freq(self):
         """
@@ -290,7 +292,7 @@ class MainWindow(QMainWindow):
         self.label_frequency.setText(f"Cycles: {intervel_freq}")
         self.number_of_cycles = intervel_freq
         self.button_update()
-        logger.debug(f"Dial: Frequency Rotated Value: {intervel_freq}")
+        self.logger.debug(f"Dial: Frequency Rotated Value: {intervel_freq}")
 
     def variable_input(self):
         """
@@ -303,8 +305,8 @@ class MainWindow(QMainWindow):
         self.voltage_edit.setStyleSheet("background-color: #B8B8B8")
         self.voltage_edit.setText(f"{self.voltage}")
         self.voltage_edit.setFixedWidth(50)
-        voltage_label = QLabel("Voltage:")
-        form_layout.addWidget(voltage_label, 0, 1)
+        self.voltage_label = QLabel("Voltage:")
+        form_layout.addWidget(self.voltage_label, 0, 1)
         form_layout.addWidget(self.voltage_edit, 0, 2, alignment=Qt.AlignmentFlag.AlignLeft)
 
         # Input field: For Frequency.
@@ -384,7 +386,7 @@ class MainWindow(QMainWindow):
 
         form_layout.setContentsMargins(10, 0, 10, 10)  # left, top, right, bottom from sides.
         self.grid_layout.addLayout(form_layout, 3, 2, alignment=Qt.AlignmentFlag.AlignRight)
-        logger.debug("Input for GUI initialized...")
+        self.logger.debug("Input for GUI initialized...")
 
     def log_buttons(self):
         """
@@ -410,9 +412,9 @@ class MainWindow(QMainWindow):
         """
         match option_num:
             case 0:
-                logger.setLevel(logging.INFO)
+                self.logger.setLevel(logging.INFO)
             case 1:
-                logger.setLevel(logging.DEBUG)
+                self.logger.setLevel(logging.DEBUG)
 
     def monitor(self):
         """
@@ -451,14 +453,14 @@ class MainWindow(QMainWindow):
         else:
             self.pause_button.setText("Pause")
             self.timer.start()
-        logger.debug(f"Pause Button Pressed, State: {self.pause_button.isChecked()},Text : {self.pause_button.text()}")
+        self.logger.debug(f"Pause Button Pressed, State: {self.pause_button.isChecked()},Text : {self.pause_button.text()}")
 
     def button_update(self,):
         """
         This is the Update Button, which will re plot the graphs for new values.
         """
         # Use can "Button groups" or sender() for large number of buttons in order to know which button is clicked.
-        logger.debug("Update button pushed..")
+        self.logger.debug("Update button pushed..")
 
         # Update exceptions.
         class LowFrequency(Exception):
@@ -487,7 +489,7 @@ class MainWindow(QMainWindow):
             sender().text() can be used with any button which has setText() method.
             """
             if self.sender().objectName() in ["Update", "freq_dial"]:
-                logger.debug(f"Button used: {self.sender().objectName()}")
+                self.logger.debug(f"Button used: {self.sender().objectName()}")
                 # print(self.sender())
                 # print(self.sender().objectName())
                 self.voltage = float(self.voltage_edit.text() if len(self.voltage_edit.text()) else self.voltage)
@@ -507,7 +509,7 @@ class MainWindow(QMainWindow):
 
                 self.pulse_on_time = round(1 / self.freq * (self.duty / 100), self.value_accuracy)
                 self.update_legend()
-                logger.info(
+                self.logger.info(
                     f"""Initialized with values....
                     Frequency: {self.freq}
                     Time Period: {self.time_period}
@@ -526,7 +528,7 @@ class MainWindow(QMainWindow):
                 # Generate X - Axis.
                 self.x_axis = list(round(n, self.value_accuracy) for n in arange(0.0, self.time_period * self.number_of_cycles, self.step_size))
                 self.y_axis_on = self.y_axis()
-                logger.debug(
+                self.logger.debug(
                     f"""
                     x-Axis generated; Size: {len(self.x_axis)},
                     Plot Start: {0.0} Plot End: {self.time_period * self.number_of_cycles}
@@ -534,10 +536,10 @@ class MainWindow(QMainWindow):
                 )
 
             if self.chk_button.isChecked():
-                logger.debug("Show Off cycle: Checked")
+                self.logger.debug("Show Off cycle: Checked")
                 self.y_axis_off = list(map(lambda v: 0.0 if v == self.voltage else self.voltage, self.y_axis_on))
             if self.chk_button_sine.isChecked():
-                logger.debug("Show Sine Wave: Checked")
+                self.logger.debug("Show Sine Wave: Checked")
                 self.sine_y = [self.voltage * sin(2 * pi * self.freq * value) for value in self.x_axis]
 
             # Update Monitor
@@ -586,6 +588,6 @@ if __name__ == "__main__":
     handle.setFormatter(format)
     logger.addHandler(handle)
 
-    main = MainWindow()
+    main = MainWindow(logger)
     main.show()
     app.exec()
