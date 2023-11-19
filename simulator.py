@@ -499,7 +499,7 @@ class MainWindow(QMainWindow):
                 self.time_period = round(1/self.freq, self.value_accuracy)
                 self.duty = int(self.duty_edit.text() if len(self.duty_edit.text()) else self.duty)
                 self.suggested_step = 1/10 ** (len(f"{self.freq}") + 2)
-                self.step_size = self.suggested_step if float(self.step_size_edit.text()) > self.suggested_step else float(self.step_size_edit.text()) 
+                self.step_size = self.suggested_step if float(self.step_size_edit.text()) > self.suggested_step else float(self.step_size_edit.text())
                 self.step_size_edit.setText(f"{self.step_size}")
                 self.accuracy_edit.setText(f"{self.value_accuracy}")
 
