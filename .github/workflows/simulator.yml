@@ -30,4 +30,4 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest -sv -p no:warnings tests\test_simulator.py
+          pytest -rA
