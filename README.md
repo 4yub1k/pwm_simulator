@@ -8,6 +8,8 @@
 ![PyQtGraph](https://img.shields.io/badge/0.13.3-PyQtGraph-orchid?style=for-the-badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](https://github.com/4yub1k/pwm_simulator/blob/main/LICENSE)
 
+![Main Screen](https://github.com/4yub1k/pwm_simulator/assets/45902447/39253271-ccf7-450b-baca-cdf7c95edf85)
+
 **Features:**
 - Generate Signal of frequency.
 - Adjust the Voltage of the signal.
